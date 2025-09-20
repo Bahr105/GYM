@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المشتركين - جيم عبدالودود</title>
+    <link rel="stylesheet" href="members.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-btn" id="menuBtn">
+                <ion-icon name="menu-outline"></ion-icon>
+            </button>
+            <h1>جيم عبدالودود - إدارة المشتركين</h1>
+        </div>
+        <div class="header-right">
+            <div class="admin-info" id="adminProfile">
+                <img src="https://via.placeholder.com/40" alt="صورة الأدمن" id="adminPhoto">
+                <span id="adminName">أدمن</span>
+                <ion-icon name="chevron-down-outline"></ion-icon>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="https://via.placeholder.com/60" alt="لوجو الجيم">
+            <h3>جيم عبدالودود</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="admin-dashboard.html#dashboard">
+                    <ion-icon name="grid-outline"></ion-icon>
+                    <span>لوحة التحكم</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-dashboard.html#captains">
+                    <ion-icon name="people-outline"></ion-icon>
+                    <span>إدارة الكباتن</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="members.html">
+                    <ion-icon name="person-outline"></ion-icon>
+                    <span>المشتركين</span>
+                </a>
+            </li>
+            <li>
+    <a href="renewed-subscriptions.html" class="sidebar-link renewed-subs-link">
+        <ion-icon name="sync-outline"></ion-icon>
+        <span>الاشتراكات المجددة</span>
+    </a>
+</li>
+            <li>
+                <a href="admin-dashboard.html#reports">
+                    <ion-icon name="bar-chart-outline"></ion-icon>
+                    <span>التقارير والإحصائيات</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-dashboard.html#permissions">
+                    <ion-icon name="lock-closed-outline"></ion-icon>
+                    <span>الصلاحيات</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin-dashboard.html#settings">
+                    <ion-icon name="settings-outline"></ion-icon>
+                    <span>الإعدادات</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logoutBtn">
+                <ion-icon name="log-out-outline"></ion-icon>
+                <span>تسجيل الخروج</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <section class="content-section active">
+            <div class="page-header">
+                <h2>إدارة المشتركين</h2>
+                <button class="add-btn" id="addMemberBtn">
+                    <ion-icon name="person-add-outline"></ion-icon>
+                    إضافة مشترك جديد
+                </button>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="filters-container">
+                <div class="search-box">
+                    <ion-icon name="search-outline"></ion-icon>
+                    <input type="text" id="searchInput" placeholder="ابحث باسم المشترك أو رقم الهاتف...">
+                </div>
+                
+                <div class="filter-group">
+                    <select id="statusFilter">
+                        <option value="all">جميع الحالات</option>
+                        <option value="active">نشط</option>
+                        <option value="expired">منتهي</option>
+                        <option value="blocked">محظور</option>
+                        <option value="cancelled">ملغي</option>
+                    </select>
+                    
+                    <select id="subscriptionFilter">
+                        <option value="all">جميع أنواع الاشتراكات</option>
+                        <option value="normal">عادي</option>
+                        <option value="cardio">كارديو</option>
+                    </select>
+                    
+                    <button class="filter-btn" id="applyFiltersBtn">تطبيق الفلتر</button>
+                </div>
+            </div>
+
+            <!-- Members Table -->
+            <div class="table-container">
+                <table class="data-table" id="membersTable">
+                    <thead>
+                        <tr>
+                            <th>الصورة</th>
+                            <th>الاسم</th>
+                            <th>رقم الهاتف</th>
+                            <th>نوع الاشتراك</th>
+                            <th>تاريخ البداية</th>
+                            <th>تاريخ النهاية</th>
+                            <th>الأيام المتبقية</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="membersTableBody">
+                        <!-- سيتم ملء البيانات ديناميكياً -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <button id="prevPage" class="pagination-btn">
+                    <ion-icon name="chevron-back-outline"></ion-icon>
+                </button>
+                <span id="pageInfo">الصفحة 1 من 1</span>
+                <button id="nextPage" class="pagination-btn">
+                    <ion-icon name="chevron-forward-outline"></ion-icon>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add Member Modal -->
+    <div class="modal-overlay" id="addMemberModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>إضافة مشترك جديد</h3>
+                <button class="close-btn" id="closeMemberModalBtn">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+            <form class="modal-body" id="addMemberForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="memberName">الاسم الكامل</label>
+                        <input type="text" id="memberName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="memberPhone">رقم الهاتف</label>
+                        <input type="tel" id="memberPhone" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="memberEmail">البريد الإلكتروني</label>
+                        <input type="email" id="memberEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="memberPassword">كلمة المرور</label>
+                        <input type="password" id="memberPassword" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="memberDob">تاريخ الميلاد</label>
+                        <input type="date" id="memberDob">
+                    </div>
+                    <div class="form-group">
+                        <label for="memberPhoto">صورة المشترك (رابط)</label>
+                        <input type="url" id="memberPhoto" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="subscriptionType">نوع الاشتراك</label>
+                        <select id="subscriptionType" required>
+                            <option value="normal">عادي</option>
+                            <option value="cardio">كارديو</option>
+                            <option value="single">حصة فردية</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subscriptionPrice">السعر (جنيه)</label>
+                        <input type="number" id="subscriptionPrice" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">تاريخ البداية</label>
+                        <input type="date" id="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">تاريخ النهاية</label>
+                        <input type="date" id="endDate" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="paymentMethod">طريقة الدفع</label>
+                        <select id="paymentMethod" required>
+                            <option value="cash">كاش</option>
+                            <option value="visa">فيزا</option>
+                            <option value="instapay">انستاباي</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentProof">إثبات الدفع (رابط)</label>
+                        <input type="url" id="paymentProof" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="memberNotes">ملاحظات</label>
+                    <textarea id="memberNotes" rows="3"></textarea>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" id="cancelMemberBtn">إلغاء</button>
+                <button type="submit" class="save-btn" id="saveMemberBtn">حفظ المشترك</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Renew Subscription Modal -->
+   <!-- Renew Subscription Modal -->
+<div class="modal-overlay" id="renewModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>تجديد اشتراك العضو</h3>
+            <button class="close-btn" id="closeRenewModalBtn">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+        <form class="modal-body" id="renewForm">
+            <input type="hidden" id="renewMemberId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="renewType">نوع الاشتراك</label>
+                    <select id="renewType" required>
+                        <option value="normal">عادي</option>
+                        <option value="cardio">كارديو</option>
+                        <option value="single">حصة فردية</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="renewDurationMethod">تحديد المدة</label>
+                    <select id="renewDurationMethod" required>
+                        <option value="days">بالأيام</option>
+                        <option value="manual">يدويًا (تاريخ بداية ونهاية)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row" id="renewDaysGroup">
+                <div class="form-group">
+                    <label for="renewStartDate">تاريخ البداية</label>
+                    <input type="date" id="renewStartDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="renewDays">عدد الأيام</label>
+                    <input type="number" id="renewDays" min="1" required>
+                </div>
+            </div>
+            <div class="form-row" id="renewManualDatesGroup" style="display: none;">
+                <div class="form-group">
+                    <label for="renewManualStartDate">تاريخ البداية (يدوي)</label>
+                    <input type="date" id="renewManualStartDate">
+                </div>
+                <div class="form-group">
+                    <label for="renewManualEndDate">تاريخ النهاية (يدوي)</label>
+                    <input type="date" id="renewManualEndDate">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="renewPrice">السعر (جنيه)</label>
+                    <input type="number" id="renewPrice" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="renewPaymentMethod">طريقة الدفع</label>
+                    <select id="renewPaymentMethod" required>
+                        <option value="cash">كاش</option>
+                        <option value="visa">فيزا</option>
+                        <option value="instapay">انستاباي</option>
+                    </select>
+                </div>
+            </div>
+            <!-- تاريخ النهاية المحسوب سيظهر هنا فقط للقراءة -->
+            <div class="form-group" id="calculatedEndDateDisplay" style="display: none;">
+                <label>تاريخ النهاية المحسوب:</label>
+                <input type="text" id="renewCalculatedEndDate" readonly style="background-color: #e9ecef;">
+            </div>
+            <!-- إضافة حقل إثبات الدفع والملاحظات -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="renewReceipt">إثبات الدفع (رابط)</label>
+                    <input type="url" id="renewReceipt" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label for="renewNotes">ملاحظات</label>
+                    <textarea id="renewNotes" rows="2" placeholder="ملاحظات إضافية حول التجديد..."></textarea>
+                </div>
+            </div>
+        </form>
+        <!-- إضافة زر الحفظ هنا -->
+        <div class="modal-footer">
+            <button type="button" class="cancel-btn" id="cancelRenewBtn">إلغاء</button>
+            <button type="submit" class="save-btn" id="saveRenewBtn">حفظ التجديد</button>
+        </div>
+    </div>
+</div>
+
+
+    <!-- Member Details Modal -->
+    <div class="modal-overlay" id="memberDetailsModal">
+        <div class="modal large-modal">
+            <div class="modal-header">
+                <h3>تفاصيل المشترك</h3>
+                <button class="close-btn" id="closeDetailsBtn">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+            <div class="modal-body" id="memberDetailsBody">
+                <!-- سيتم ملء التفاصيل ديناميكياً -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Profile Dropdown -->
+    <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-item">
+            <ion-icon name="person-outline"></ion-icon>
+            <span>الملف الشخصي</span>
+        </div>
+        <div class="profile-item">
+            <ion-icon name="settings-outline"></ion-icon>
+            <span>الإعدادات</span>
+        </div>
+        <div class="profile-divider"></div>
+        <div class="profile-item logout" id="profileLogout">
+            <ion-icon name="log-out-outline"></ion-icon>
+            <span>تسجيل الخروج</span>
+        </div>
+    </div>
+
+    <script src="members.js"></script>
+</body>
+</html>

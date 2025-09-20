@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة جيم عبدالودود - تسجيل الدخول</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+    <div class="bubbles" id="bubbles"></div>
+    
+    <div class="container">
+        <div class="form-container">
+            <div class="form-content">
+                <h2>نظام إدارة جيم عبدالودود</h2>
+
+                <!-- تسجيل الدخول فقط -->
+                <form id="loginForm" class="form active">
+                    <div class="alert" id="loginAlert"></div>
+
+                    <div class="inputbox">
+                        <ion-icon name="mail-outline"></ion-icon>
+                        <input type="email" id="loginEmail" required />
+                        <label for="loginEmail">البريد الإلكتروني</label>
+                    </div>
+                    <div class="error-message" id="loginEmailError"></div>
+
+                    <div class="inputbox">
+                        <ion-icon name="lock-closed-outline"></ion-icon>
+                        <input type="password" id="loginPassword" required />
+                        <label for="loginPassword">كلمة المرور</label>
+                    </div>
+                    <div class="error-message" id="loginPasswordError"></div>
+
+                    <div class="forget">
+                        <label><input type="checkbox" id="rememberMe"> تذكرني</label>
+                        <a href="#" id="forgotPassword">نسيت كلمة المرور؟</a>
+                    </div>
+
+                    <button type="submit" id="loginButton">تسجيل الدخول</button>
+                    
+                    <div class="contact-info">
+                        <p>للحصول على حساب، يرجى التواصل مع الكابتن المسؤول او المطور </p>
+                        <p>هاتف: 01117032365</p>
+                        <p>بريد إلكتروني: abdulrahman61421@gmail.com</p>
+                        <p>جميع الحقوق محفوظة بحر الصياد</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

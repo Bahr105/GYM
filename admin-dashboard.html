@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الأدمن - جيم عبدالودود</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-btn" id="menuBtn">
+                <ion-icon name="menu-outline"></ion-icon>
+            </button>
+            <h1>جيم عبدالودود - لوحة الأدمن</h1>
+        </div>
+        <div class="header-right">
+            <div class="admin-info" id="adminProfile">
+                <img src="https://via.placeholder.com/40" alt="صورة الأدمن" id="adminPhoto">
+                <span id="adminName">أدمن</span>
+                <ion-icon name="chevron-down-outline"></ion-icon>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="https://via.placeholder.com/60" alt="لوجو الجيم">
+            <h3>جيم عبدالودود</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="active">
+                <a href="#dashboard">
+                    <ion-icon name="grid-outline"></ion-icon>
+                    <span>لوحة التحكم</span>
+                </a>
+            </li>
+            <li>
+                <a href="#captains">
+                    <ion-icon name="people-outline"></ion-icon>
+                    <span>إدارة الكباتن</span>
+                </a>
+            </li>
+               <li>
+               <a href="members.html" class="sidebar-link members-link">
+               <ion-icon name="person-outline"></ion-icon>
+               <span>المشتركين</span>
+               </a>
+               </li>
+                           <li>
+                <a href="renewed-subscriptions.html" class="sidebar-link renewed-subs-link">
+                    <ion-icon name="sync-outline"></ion-icon>
+                    <span>الاشتراكات المجددة</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#reports">
+                    <ion-icon name="bar-chart-outline"></ion-icon>
+                    <span>التقارير والإحصائيات</span>
+                </a>
+            </li>
+            <li>
+                <a href="#permissions">
+                    <ion-icon name="lock-closed-outline"></ion-icon>
+                    <span>الصلاحيات</span>
+                </a>
+            </li>
+            <li>
+                <a href="#settings">
+                    <ion-icon name="settings-outline"></ion-icon>
+                    <span>الإعدادات</span>
+                </a>
+            </li>
+
+        </ul>
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logoutBtn">
+                <ion-icon name="log-out-outline"></ion-icon>
+                <span>تسجيل الخروج</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="content-section active">
+            <div class="page-header">
+                <h2>لوحة التحكم الرئيسية</h2>
+                <div class="date-filter">
+                    <input type="date" id="startDate" class="date-input">
+                    <span>إلى</span>
+                    <input type="date" id="endDate" class="date-input">
+                    <button id="filterBtn" class="filter-btn">تطبيق الفلتر</button>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-icon">
+                        <ion-icon name="person-add-outline"></ion-icon>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="newMembers">0</h3>
+                        <p>مشتركين جدد</p>
+                    </div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon">
+                        <ion-icon name="refresh-outline"></ion-icon>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="renewals">0</h3>
+                        <p>تجديدات</p>
+                    </div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon">
+                        <ion-icon name="fitness-outline"></ion-icon>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="singleSessions">0</h3>
+                        <p>حصص فردية</p>
+                    </div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-icon">
+                        <ion-icon name="cash-outline"></ion-icon>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalRevenue">0 جنيه</h3>
+                        <p>إجمالي الإيرادات</p>
+                    </div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-icon">
+                        <ion-icon name="ban-outline"></ion-icon>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="blockedMembers">0</h3>
+                        <p>حسابات محظورة</p>
+                    </div>
+                </div>
+                <div class="stat-card secondary">
+                    <div class="stat-icon">
+                        <ion-icon name="close-circle-outline"></ion-icon>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="cancelledSubs">0</h3>
+                        <p>اشتراكات ملغية</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Captain Performance -->
+            <div class="captain-performance">
+                <h3>أداء الكباتن</h3>
+                <div class="performance-table-container">
+                    <table class="performance-table" id="performanceTable">
+                        <thead>
+                            <tr>
+                                <th>اسم الكابتن</th>
+                                <th>مشتركين جدد</th>
+                                <th>تجديدات</th>
+                                <th>حصص فردية</th>
+                                <th>إلغاءات</th>
+                                <th>بلوكات</th>
+                                <th>الإجمالي</th>
+                                <th>التفاصيل</th>
+                            </tr>
+                        </thead>
+                        <tbody id="performanceTableBody">
+                            <!-- سيتم ملء البيانات ديناميكياً -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Captains Management Section -->
+        <section id="captains-section" class="content-section">
+            <div class="page-header">
+                <h2>إدارة الكباتن</h2>
+                <button class="add-btn" id="addCaptainBtn">
+                    <ion-icon name="person-add-outline"></ion-icon>
+                    إضافة كابتن جديد
+                </button>
+            </div>
+
+            <!-- Captains List -->
+            <div class="captains-grid" id="captainsGrid">
+                <!-- سيتم ملء بطاقات الكباتن ديناميكياً -->
+            </div>
+        </section>
+
+        <!-- Members Section -->
+        <section id="members-section" class="content-section">
+            <div class="page-header">
+                <h2>إدارة المشتركين</h2>
+            </div>
+            <p class="coming-soon">قريباً - صفحة إدارة المشتركين</p>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="reports-section" class="content-section">
+            <div class="page-header">
+                <h2>التقارير والإحصائيات</h2>
+            </div>
+            <p class="coming-soon">قريباً - صفحة التقارير المفصلة</p>
+        </section>
+
+        <!-- Permissions Section -->
+        <section id="permissions-section" class="content-section">
+            <div class="page-header">
+                <h2>إدارة الصلاحيات</h2>
+            </div>
+            <p class="coming-soon">قريباً - صفحة إدارة صلاحيات الكباتن</p>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="settings-section" class="content-section">
+            <div class="page-header">
+                <h2>إعدادات النظام</h2>
+            </div>
+            <p class="coming-soon">قريباً - صفحة إعدادات الجيم</p>
+        </section>
+    </main>
+
+    <!-- Add Captain Modal -->
+    <div class="modal-overlay" id="addCaptainModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>إضافة كابتن جديد</h3>
+                <button class="close-btn" id="closeModalBtn">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+            <form class="modal-body" id="addCaptainForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="captainName">الاسم</label>
+                        <input type="text" id="captainName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="captainPhone">رقم الهاتف</label>
+                        <input type="tel" id="captainPhone" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="captainEmail">البريد الإلكتروني</label>
+                        <input type="email" id="captainEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="captainDob">تاريخ الميلاد</label>
+                        <input type="date" id="captainDob" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="captainJob">الوظيفة</label>
+                        <input type="text" id="captainJob" placeholder="مثال: مدرب شخصي" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="captainPassword">كلمة المرور المؤقتة</label>
+                        <input type="password" id="captainPassword" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="captainPhoto">صورة الكابتن (رابط Google Drive)</label>
+                    <input type="url" id="captainPhoto" placeholder="https://drive.google.com/...">
+                </div>
+
+                <div class="permissions-section">
+                    <h4>الصلاحيات الأساسية</h4>
+                    <div class="permissions-grid">
+                        <label class="permission-item">
+                            <input type="checkbox" id="canCreateMember" checked>
+                            <span>تسجيل مشتركين جدد</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="canRenewSub" checked>
+                            <span>تجديد الاشتراكات</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="canBlockMember">
+                            <span>بلوك المشتركين</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="canDeleteMember">
+                            <span>حذف المشتركين</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="canSingleSession" checked>
+                            <span>تسجيل حصص فردية</span>
+                        </label>
+                        <label class="permission-item">
+                            <input type="checkbox" id="canSendNotifications" checked>
+                            <span>إرسال إشعارات</span>
+                        </label>
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" id="cancelBtn">إلغاء</button>
+                <button type="submit" class="save-btn" id="saveCaptainBtn">حفظ الكابتن</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Captain Details Modal -->
+    <div class="modal-overlay" id="captainDetailsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>تفاصيل الكابتن</h3>
+                <button class="close-btn" id="closeDetailsBtn">
+                    <ion-icon name="close-outline"></ion-icon>
+                </button>
+            </div>
+            <div class="modal-body" id="captainDetailsBody">
+                <!-- سيتم ملء التفاصيل ديناميكياً -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Profile Dropdown -->
+    <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-item">
+            <ion-icon name="person-outline"></ion-icon>
+            <span>الملف الشخصي</span>
+        </div>
+        <div class="profile-item">
+            <ion-icon name="settings-outline"></ion-icon>
+            <span>الإعدادات</span>
+        </div>
+        <div class="profile-divider"></div>
+        <div class="profile-item logout" id="profileLogout">
+            <ion-icon name="log-out-outline"></ion-icon>
+            <span>تسجيل الخروج</span>
+        </div>
+    </div>
+
+    <script src="admin-dashboard.js"></script>
+</body>
+</html>

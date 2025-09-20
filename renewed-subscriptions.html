@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الاشتراكات المجددة - جيم عبدالودود</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style">
+    <link rel="preload" href="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" as="script">
+    
+    <!-- Stylesheets -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="renewed-subscriptions.css">
+    
+    <!-- Critical CSS should be inlined here for better performance -->
+    <style>
+        /* تم نقل جزء من CSS الحرجة هنا */
+        :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #1e40af;
+            --primary-light: #60a5fa;
+            --primary-lighter: #dbeafe;
+            --secondary-color: #6366f1;
+            --accent-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --sidebar-width: 280px;
+            --sidebar-width-collapsed: 80px;
+            --header-height: 80px;
+            --border-radius: 16px;
+            --border-radius-sm: 8px;
+            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --transition-fast: 0.15s ease-out;
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+            color: var(--gray-900);
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        body.loading {
+            overflow: hidden;
+        }
+        
+        body.loading .main-content {
+            opacity: 0;
+        }
+        
+        body.loaded .main-content {
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        
+        /* Global Loading Styles */
+        .global-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .global-loading.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-content {
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--gray-200);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+    
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    
+    <!-- Ion Icons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+    <!-- Progressive Web App Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    
+    <!-- SEO and Social Media Tags -->
+    <meta name="description" content="إدارة الاشتراكات المجددة في جيم عبدالودود - نظام إدارة شامل وحديث">
+    <meta name="keywords" content="جيم, إدارة, اشتراكات, رياضة, لياقة بدنية">
+    <meta name="author" content="بحر الصياد">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="الاشتراكات المجددة - جيم عبدالودود">
+    <meta property="og:description" content="نظام إدارة الاشتراكات المجددة">
+    <meta property="og:type" content="website">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
+    
+    <!-- Prevent FOUC (Flash of Unstyled Content) -->
+    <script>
+        // تمت إزالة هذا السكريبت لمنع FOUC
+        // سيتم التعامل مع التحميل عبر CSS بشكل أكثر كفاءة
+    </script>
+</head>
+<body class="loading">
+    <!-- Loading Screen -->
+    <div id="initialLoader" class="global-loading show">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>جاري تحميل النظام...</p>
+        </div>
+    </div>
+
+    <!-- Skip Navigation Link for Accessibility -->
+    <a href="#main-content" class="sr-only">انتقل إلى المحتوى الرئيسي</a>
+
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="header-left">
+            <button class="menu-btn" id="menuBtn" aria-label="فتح/إغلاق القائمة الجانبية" aria-expanded="false">
+                <ion-icon name="menu-outline" aria-hidden="true"></ion-icon>
+            </button>
+            <h1>جيم عبدالودود - الاشتراكات المجددة</h1>
+        </div>
+        <div class="header-right">
+            <div class="admin-info" id="adminProfile" role="button" aria-haspopup="true" aria-expanded="false">
+                <img src="https://via.placeholder.com/40" alt="صورة الأدمن" id="adminPhoto" loading="lazy">
+                <span id="adminName">أدمن</span>
+                <ion-icon name="chevron-down-outline" aria-hidden="true"></ion-icon>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar" role="navigation" aria-label="القائمة الرئيسية">
+        <div class="sidebar-header">
+            <img src="https://via.placeholder.com/60" alt="لوجو الجيم" loading="lazy">
+            <h3>جيم عبدالودود</h3>
+        </div>
+        <ul class="sidebar-menu" role="menubar">
+            <li role="none">
+                <a href="admin-dashboard.html#dashboard" role="menuitem">
+                    <ion-icon name="grid-outline" aria-hidden="true"></ion-icon>
+                    <span>لوحة التحكم</span>
+                </a>
+            </li>
+            <li role="none">
+                <a href="admin-dashboard.html#captains" role="menuitem">
+                    <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+                    <span>إدارة الكباتن</span>
+                </a>
+            </li>
+            <li role="none">
+                <a href="members.html" role="menuitem">
+                    <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
+                    <span>المشتركين</span>
+                </a>
+            </li>
+            <li class="active" role="none">
+                <a href="renewed-subscriptions.html" role="menuitem" aria-current="page">
+                    <ion-icon name="sync-outline" aria-hidden="true"></ion-icon>
+                    <span>الاشتراكات المجددة</span>
+                </a>
+            </li>
+            <li role="none">
+                <a href="admin-dashboard.html#reports" role="menuitem">
+                    <ion-icon name="bar-chart-outline" aria-hidden="true"></ion-icon>
+                    <span>التقارير والإحصائيات</span>
+                </a>
+            </li>
+            <li role="none">
+                <a href="admin-dashboard.html#permissions" role="menuitem">
+                    <ion-icon name="lock-closed-outline" aria-hidden="true"></ion-icon>
+                    <span>الصلاحيات</span>
+                </a>
+            </li>
+            <li role="none">
+                <a href="admin-dashboard.html#settings" role="menuitem">
+                    <ion-icon name="settings-outline" aria-hidden="true"></ion-icon>
+                    <span>الإعدادات</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logoutBtn" aria-label="تسجيل الخروج">
+                <ion-icon name="log-out-outline" aria-hidden="true"></ion-icon>
+                <span>تسجيل الخروج</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent" role="main">
+        <section class="content-section active">
+            <!-- Page Header -->
+            <header class="page-header">
+                <h2>الاشتراكات المجددة</h2>
+                <div class="page-actions">
+                    <button class="filter-btn" onclick="loadRenewedSubscriptionsData()" aria-label="تحديث البيانات">
+                        <ion-icon name="refresh-outline" aria-hidden="true"></ion-icon>
+                        تحديث
+                    </button>
+                </div>
+                <div class="grid-view-options">
+    <button class="view-option-btn" data-view="dense">
+        <ion-icon name="grid-outline"></ion-icon>
+        مكثف
+    </button>
+    <button class="view-option-btn active" data-view="default">
+        <ion-icon name="square-outline"></ion-icon>
+        افتراضي
+    </button>
+    <button class="view-option-btn" data-view="comfortable">
+        <ion-icon name="browsers-outline"></ion-icon>
+        مريح
+    </button>
+</div>
+            </header>
+
+            <!-- Filters and Search -->
+            <div class="filters-container" role="search" aria-label="فلترة الاشتراكات">
+                <div class="search-box">
+                    <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+                    <input type="text" 
+                           id="searchInput" 
+                           placeholder="ابحث باسم المشترك أو الكابتن..." 
+                           autocomplete="off"
+                           aria-label="بحث في الاشتراكات">
+                </div>
+                
+                <div class="filter-group" role="group" aria-label="فلاتر البحث">
+                    <select id="captainFilter" aria-label="فلترة بالكابتن">
+                        <option value="all">جميع الكباتن</option>
+                        <!-- سيتم ملء الكباتن ديناميكياً -->
+                    </select>
+                    
+                    <select id="typeFilter" aria-label="فلترة بنوع الاشتراك">
+                        <option value="all">جميع الأنواع</option>
+                        <option value="normal">عادي</option>
+                        <option value="cardio">كارديو</option>
+                        <option value="single">حصة فردية</option>
+                    </select>
+
+                    <select id="statusFilter" aria-label="فلترة بحالة الاشتراك">
+                        <option value="all">جميع الحالات</option>
+                        <option value="active">نشط</option>
+                        <option value="cancelled">ملغي</option>
+                        <option value="expired">منتهي</option>
+                    </select>
+
+                    <label for="startDateFilter" class="sr-only">تاريخ البداية</label>
+                    <input type="date" id="startDateFilter" aria-label="من تاريخ">
+                    
+                    <span aria-hidden="true">إلى</span>
+                    
+                    <label for="endDateFilter" class="sr-only">تاريخ النهاية</label>
+                    <input type="date" id="endDateFilter" aria-label="إلى تاريخ">
+                    
+                    <button class="filter-btn" id="applyFiltersBtn" aria-label="تطبيق الفلاتر">
+                        <ion-icon name="funnel-outline" aria-hidden="true"></ion-icon>
+                        تطبيق الفلتر
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cards Container -->
+            <div class="cards-container" 
+                 id="renewedSubscriptionsCards" 
+                 role="region" 
+                 aria-label="قائمة الاشتراكات المجددة"
+                 aria-live="polite">
+                <!-- سيتم ملء الكاردز ديناميكياً -->
+            </div>
+
+            <!-- Pagination -->
+            <nav class="pagination" 
+                 id="pagination" 
+                 role="navigation" 
+                 aria-label="تصفح الصفحات">
+                <button id="prevPage" 
+                        class="pagination-btn" 
+                        aria-label="الصفحة السابقة"
+                        disabled>
+                    <ion-icon name="chevron-back-outline" aria-hidden="true"></ion-icon>
+                </button>
+                
+                <div id="pageInfo" aria-live="polite">
+                    الصفحة 1 من 1
+                </div>
+                
+                <button id="nextPage" 
+                        class="pagination-btn" 
+                        aria-label="الصفحة التالية"
+                        disabled>
+                    <ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+                </button>
+            </nav>
+        </section>
+    </main>
+
+    <!-- Admin Profile Dropdown -->
+    <div class="profile-dropdown" id="profileDropdown" role="menu" aria-hidden="true">
+        <div class="profile-item" role="menuitem">
+            <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
+            <span>الملف الشخصي</span>
+        </div>
+        <div class="profile-item" role="menuitem">
+            <ion-icon name="settings-outline" aria-hidden="true"></ion-icon>
+            <span>الإعدادات</span>
+        </div>
+        <div class="profile-divider" role="separator"></div>
+        <div class="profile-item logout" id="profileLogout" role="menuitem">
+            <ion-icon name="log-out-outline" aria-hidden="true"></ion-icon>
+            <span>تسجيل الخروج</span>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+    <!-- Scripts - Load at the end for better performance -->
+    <script>
+        // Remove initial loader when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const loader = document.getElementById('initialLoader');
+            if (loader) {
+                setTimeout(() => {
+                    loader.classList.remove('show');
+                    setTimeout(() => loader.remove(), 300);
+                }, 1000);
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'k':
+                        e.preventDefault();
+                        const searchInput = document.getElementById('searchInput');
+                        if (searchInput) searchInput.focus();
+                        break;
+                    case 'b':
+                        e.preventDefault();
+                        const menuBtn = document.getElementById('menuBtn');
+                        if (menuBtn) menuBtn.click();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        if (typeof loadRenewedSubscriptionsData === 'function') {
+                            loadRenewedSubscriptionsData();
+                        }
+                        break;
+                }
+            }
+        });
+        
+        // Update menu button ARIA attributes
+        function updateMenuButtonAria() {
+            const menuBtn = document.getElementById('menuBtn');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (menuBtn && sidebar) {
+                const isExpanded = !sidebar.classList.contains('closed');
+                menuBtn.setAttribute('aria-expanded', isExpanded.toString());
+            }
+        }
+        
+        // Update admin profile ARIA attributes
+        function updateProfileAria() {
+            const adminProfile = document.getElementById('adminProfile');
+            const dropdown = document.getElementById('profileDropdown');
+            
+            if (adminProfile && dropdown) {
+                const isExpanded = dropdown.classList.contains('show');
+                adminProfile.setAttribute('aria-expanded', isExpanded.toString());
+                dropdown.setAttribute('aria-hidden', (!isExpanded).toString());
+            }
+        }
+    </script>
+    
+    <!-- Main JavaScript -->
+    <script src="renewed-subscriptions.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
